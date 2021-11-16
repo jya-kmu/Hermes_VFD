@@ -36,4 +36,4 @@ make install
 To use the HDF5 Hermes VFD in an HDF5 application, the driver can either be linked into the application, or it can be dynamically loaded as a plugin. If dynamically loading the Hermes VFD, users should ensure that the HDF5_PLUGIN_PATH environment variable points to the directory containing the built VFD library if the VFD has been installed to a non-standard location.
 
 ### Method 1: Linked into application
-To link the Hermes VFD into an HDF5 application, the application should include the H5FDhermes.h header that gets installed on the system and should link the installed VFD library (libhermes_vfd.so) into the application. Once this has been done, Hermes VFD access can be setup by calling H5Pset_fapl_hermes(...) on a FAPL within the HDF5 application.
+To link the Hermes VFD into an HDF5 application, the application should include the H5FDhermes.h header that gets installed on the system and should link the installed VFD library (libhdf5_hermes_vfd.so) into the application. Once this has been done, Hermes VFD access can be setup by calling `H5Pset_fapl_hermes(...)` on a FAPL within the HDF5 application.
