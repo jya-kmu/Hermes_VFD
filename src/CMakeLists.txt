@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # Include source and build directories
 #------------------------------------------------------------------------------
-set(HERMES_VFD_BUILD_INCLUDE_DEPENDENCIES
+set(HDF5_HERMES_VFD_BUILD_INCLUDE_DEPENDENCIES
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -17,24 +17,24 @@ if(HDF5_FOUND)
 #      message(FATAL_ERROR "Could not find hdf5 shared target, please make "
 #"sure that HDF5 has ben compiled with shared libraries enabled.")
 #    endif()
-  set(HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
-      ${HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
+  set(HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
+      ${HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
       ${HDF5_INCLUDE_DIR}
      )
-  set(HERMES_VFD_EXT_PKG_DEPENDENCIES
-      ${HERMES_VFD_EXT_PKG_DEPENDENCIES}
+  set(HDF5_HERMES_VFD_EXT_PKG_DEPENDENCIES
+      ${HDF5_HERMES_VFD_EXT_PKG_DEPENDENCIES}
       ${HDF5_C_SHARED_LIBRARY}
      )
 else()
 # Allow for HDF5 autotools builds
   find_package(HDF5 1.13.0 MODULE REQUIRED)
   if(HDF5_FOUND)
-    set(HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
-        ${HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
+    set(HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
+        ${HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
         ${HDF5_INCLUDE_DIRS}
        )
-    set(HERMES_VFD_EXT_LIB_DEPENDENCIES
-        ${HERMES_VFD`_EXT_LIB_DEPENDENCIES}
+    set(HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES
+        ${HDF5_HERMES_VFD`_EXT_LIB_DEPENDENCIES}
         ${HDF5_LIBRARIES}
        )
   else()
@@ -45,11 +45,11 @@ endif()
 #Hermes
 find_package(HERMES REQUIRED CONFIG)
 if(HERMES_FOUND)
-  set(HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
+  set(HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
     ${HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
     ${HERMES_INCLUDE_DIR}
   )
-  set(HERMES_VFD_EXT_LIB_DEPENDENCIES
+  set(HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES
     ${HERMES_VFD_EXT_LIB_DEPENDENCIES}
     hermes_wrapper
   )
@@ -63,12 +63,12 @@ if(HERMES_VFD_ENABLE_MPI)
   find_package(MPI REQUIRED)
   if(MPI_FOUND)
     message(STATUS "found mpi.h at ${MPI_INCLUDE_PATH}")
-    set(HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
-      ${HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
+    set(HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
+      ${HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
       ${MPI_INCLUDE_PATH}
     )
-    set(HERMES_VFD_EXT_LIB_DEPENDENCIES
-      ${HERMES_VFD_EXT_LIB_DEPENDENCIES}
+    set(HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES
+      ${HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES}
       ${MPI_LIBRARIES}
     )
   else()
@@ -79,34 +79,34 @@ endif()
 #------------------------------------------------------------------------------
 # Set sources
 #------------------------------------------------------------------------------
-set(HERMES_VFD_SRCS
+set(HDF5_HERMES_VFD_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/H5FDhermes.h
   ${CMAKE_CURRENT_SOURCE_DIR}/H5FDhermes.c
 )
 
 # Hermes VFD
-add_library(hermes_vfd ${HERMES_VFD_SRCS})
-target_include_directories(hermes_vfd
-  PUBLIC  "$<BUILD_INTERFACE:${HERMES_VFD_BUILD_INCLUDE_DEPENDENCIES}>"
-          $<INSTALL_INTERFACE:${HERMES_VFD_INSTALL_INCLUDE_INTERFACE}>
+add_library(hdf5_hermes_vfd ${HDF5_HERMES_VFD_SRCS})
+target_include_directories(hdf5_hermes_vfd
+  PUBLIC  "$<BUILD_INTERFACE:${HDF5_HERMES_VFD_BUILD_INCLUDE_DEPENDENCIES}>"
+          $<INSTALL_INTERFACE:${HDF5_HERMES_VFD_INSTALL_INCLUDE_INTERFACE}>
 )
-target_include_directories(hermes_vfd
-  SYSTEM PUBLIC ${HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
+target_include_directories(hdf5_hermes_vfd
+  SYSTEM PUBLIC ${HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
 )
-target_link_libraries(hermes_vfd
-  ${HERMES_VFD_EXPORTED_LIBS}
-  ${HERMES_VFD_EXT_LIB_DEPENDENCIES}
-  ${HERMES_VFD_EXT_PKG_DEPENDENCIES}
+target_link_libraries(hdf5_hermes_vfd
+  ${HDF5_HERMES_VFD_EXPORTED_LIBS}
+  ${HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES}
+  ${HDF5_HERMES_VFD_EXT_PKG_DEPENDENCIES}
   )
 
-hermes_vfd_set_lib_options(hermes_vfd "hermes_vfd" ${HERMES_VFD_LIBTYPE})
+hdf5_hermes_vfd_set_lib_options(hdf5_hermes_vfd "hdf5_hermes_vfd" ${HDF5_HERMES_VFD_LIBTYPE})
 
-set(HERMES_VFD_EXPORTED_LIBS hermes_vfd ${HERMES_VFD_EXPORTED_LIBS})
+set(HDF5_HERMES_VFD_EXPORTED_LIBS hdf5_hermes_vfd ${HDF5_HERMES_VFD_EXPORTED_LIBS})
 
 #-----------------------------------------------------------------------------
 # Specify project header files to be installed
 #-----------------------------------------------------------------------------
-set(HERMES_VFD_HEADERS
+set(HDF5_HERMES_VFD_HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/H5FDhermes.h
 )
 
@@ -115,9 +115,9 @@ set(HERMES_VFD_HEADERS
 #-----------------------------------------------------------------------------
 install(
   FILES
-    ${HERMES_VFD_HEADERS}
+    ${HDF5_HERMES_VFD_HEADERS}
   DESTINATION
-    ${HERMES_VFD_INSTALL_INCLUDE_DIR}
+    ${HDF5_HERMES_VFD_INSTALL_INCLUDE_DIR}
   COMPONENT
     headers
 )
@@ -127,12 +127,12 @@ install(
 #-----------------------------------------------------------------------------
 install(
   TARGETS
-    hermes_vfd
+    hdf5_hermes_vfd
   EXPORT
-    ${HERMES_VFD_EXPORTED_TARGETS}
-  LIBRARY DESTINATION ${HERMES_VFD_INSTALL_LIB_DIR}
-  ARCHIVE DESTINATION ${HERMES_VFD_INSTALL_LIB_DIR}
-  RUNTIME DESTINATION ${HERMES_VFD_INSTALL_BIN_DIR}
+    ${HDF5_HERMES_VFD_EXPORTED_TARGETS}
+  LIBRARY DESTINATION ${HDF5_HERMES_VFD_INSTALL_LIB_DIR}
+  ARCHIVE DESTINATION ${HDF5_HERMES_VFD_INSTALL_LIB_DIR}
+  RUNTIME DESTINATION ${HDF5_HERMES_VFD_INSTALL_BIN_DIR}
 )
 
 #-----------------------------------------------------------------------------
@@ -140,22 +140,22 @@ install(
 #-----------------------------------------------------------------------------
 install(
   EXPORT
-    ${HERMES_VFD_EXPORTED_TARGETS}
+    ${HDF5_HERMES_VFD_EXPORTED_TARGETS}
   DESTINATION
-    ${HERMES_VFD_INSTALL_DATA_DIR}/cmake/hermes_vfd
+    ${HDF5_HERMES_VFD_INSTALL_DATA_DIR}/cmake/hdf5_hermes_vfd
   FILE
-    ${HERMES_VFD_EXPORTED_TARGETS}.cmake
+    ${HDF5_HERMES_VFD_EXPORTED_TARGETS}.cmake
 )
 
 #-----------------------------------------------------------------------------
 # Export all exported targets to the build tree for use by parent project
-#-----------------------------------------------------------------------------
-if(NOT HERMES_VFD_EXTERNALLY_CONFIGURED)
+
+if(NOT HDF5_HERMES_VFD_EXTERNALLY_CONFIGURED)
   export(
     TARGETS
-      ${HERMES_VFD_EXPORTED_LIBS}
+      ${HDF5_HERMES_VFD_EXPORTED_LIBS}
     FILE
-      ${HERMES_VFD_EXPORTED_TARGETS}.cmake
+      ${HDF5_HERMES_VFD_EXPORTED_TARGETS}.cmake
   )
 endif()
 
@@ -169,72 +169,72 @@ if(CMAKE_BUILD_TYPE)
 endif()
 
 # Hermes VFD package dependencies
-foreach(pkg_dep ${HERMES_VFD_EXT_PKG_DEPENDENCIES})
-  set(HERMES_VFD_PKG_DEPENDENCIES "${HERMES_VFD_PKG_DEPENDENCIES} ${pkg_dep}")
+foreach(pkg_dep ${HDF5_HERMES_VFD_EXT_PKG_DEPENDENCIES})
+  set(HDF5_HERMES_VFD_PKG_DEPENDENCIES "${HDF5_HERMES_VFD_PKG_DEPENDENCIES} ${pkg_dep}")
 endforeach()
-set(HERMES_VFD_PKG_DEPENDENCIES ${HERMES_VFD_PKG_DEPENDENCIES} PARENT_SCOPE)
+set(HDF5_HERMES_VFD_PKG_DEPENDENCIES ${HDF5_HERMES_VFD_PKG_DEPENDENCIES} PARENT_SCOPE)
 
 # Hermes VFD private library dependencies
-foreach(exported_lib ${HERMES_VFD_EXPORTED_LIBS})
+foreach(exported_lib ${HDF5_HERMES_VFD_EXPORTED_LIBS})
   if(lower_cmake_build_type MATCHES "debug")
-    get_target_property(HERMES_VFD_LIBRARY ${exported_lib} DEBUG_OUTPUT_NAME)
+    get_target_property(HDF5_HERMES_VFD_LIBRARY ${exported_lib} DEBUG_OUTPUT_NAME)
   else()
-    get_target_property(HERMES_VFD_LIBRARY ${exported_lib} RELEASE_OUTPUT_NAME)
+    get_target_property(HDF5_HERMES_VFD_LIBRARY ${exported_lib} RELEASE_OUTPUT_NAME)
   endif()
-  set(HERMES_VFD_LIBRARIES "${HERMES_VFD_LIBRARIES} -l${HERMES_VFD_LIBRARY}")
+  set(HDF5_HERMES_VFD_LIBRARIES "${HDF5_HERMES_VFD_LIBRARIES} -l${HDF5_HERMES_VFD_LIBRARY}")
 endforeach()
-set(HERMES_VFD_LIBRARIES ${HERMES_VFD_LIBRARIES} PARENT_SCOPE)
+set(HDF5_HERMES_VFD_LIBRARIES ${HDF5_HERMES_VFD_LIBRARIES} PARENT_SCOPE)
 
 # Hermes VFD external library dependencies
 # Need to generate -lib if not already passed
-set(HERMES_VFD_EXT_LIB_DEPENDENCIES
-  ${HERMES_VFD_EXT_LIB_DEPENDENCIES}
-  ${HERMES_VFD_EXT_PKG_LIB_DEPENDENCIES}
+set(HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES
+  ${HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES}
+  ${HDF5_HERMES_VFD_EXT_PKG_LIB_DEPENDENCIES}
 )
-foreach(lib_dep ${HERMES_VFD_EXT_LIB_DEPENDENCIES})
+foreach(lib_dep ${HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES})
   # get library name
   get_filename_component(lib_name ${lib_dep} NAME_WE)
   if(lib_name MATCHES "^-l")
     # lib_name found is -lxxx
-    set(HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST ${HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST} ${lib_name})
+    set(HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST ${HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST} ${lib_name})
   else()
     # lib_name is /path/to/lib so get library path and name
     get_filename_component(lib_path ${lib_dep} PATH)
     string(REGEX REPLACE "^lib" "" lib_name ${lib_name})
-    set(HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST ${HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST} -L${lib_path} -l${lib_name})
+    set(HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST ${HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST} -L${lib_path} -l${lib_name})
   endif()
 endforeach()
-if(HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST)
-  list(REMOVE_DUPLICATES HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST)
+if(HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST)
+  list(REMOVE_DUPLICATES HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST)
 endif()
-foreach(lib_dep ${HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST})
-  set(HERMES_VFD_LIB_DEPENDENCIES "${HERMES_VFD_LIB_DEPENDENCIES} ${lib_dep}")
+foreach(lib_dep ${HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES_LIST})
+  set(HDF5_HERMES_VFD_LIB_DEPENDENCIES "${HDF5_HERMES_VFD_LIB_DEPENDENCIES} ${lib_dep}")
 endforeach()
-set(HERMES_VFD_LIB_DEPENDENCIES ${HERMES_VFD_LIB_DEPENDENCIES} PARENT_SCOPE)
+set(HDF5_HERMES_VFD_LIB_DEPENDENCIES ${HDF5_HERMES_VFD_LIB_DEPENDENCIES} PARENT_SCOPE)
 
 # External include dependencies
-set(HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
-  ${HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
-  ${HERMES_VFD_EXT_PKG_INCLUDE_DEPENDENCIES}
+set(HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
+  ${HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
+  ${HDF5_HERMES_VFD_EXT_PKG_INCLUDE_DEPENDENCIES}
 )
-if(HERMES_VFD_EXT_INCLUDE_DEPENDENCIES)
-  list(REMOVE_DUPLICATES HERMES_VFD_EXT_INCLUDE_DEPENDENCIES)
+if(HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES)
+  list(REMOVE_DUPLICATES HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES)
 endif()
-foreach(inc_dep ${HERMES_VFD_EXT_INCLUDE_DEPENDENCIES})
-  set(HERMES_VFD_INCLUDE_DEPENDENCIES "${HERMES_VFD_INCLUDE_DEPENDENCIES} -I${inc_dep}")
+foreach(inc_dep ${HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES})
+  set(HDF5_HERMES_VFD_INCLUDE_DEPENDENCIES "${HDF5_HERMES_VFD_INCLUDE_DEPENDENCIES} -I${inc_dep}")
 endforeach()
-set(HERMES_VFD_INCLUDE_DEPENDENCIES ${HERMES_VFD_INCLUDE_DEPENDENCIES} PARENT_SCOPE)
+set(HDF5_HERMES_VFD_INCLUDE_DEPENDENCIES ${HDF5_HERMES_VFD_INCLUDE_DEPENDENCIES} PARENT_SCOPE)
 
-set(HERMES_VFD_INCLUDES_BUILD_TIME
+set(HDF5_HERMES_VFD_INCLUDES_BUILD_TIME
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
+  ${HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
   PARENT_SCOPE
 )
 
-set(HERMES_VFD_INCLUDES_INSTALL_TIME
+set(HDF5_HERMES_VFD_INCLUDES_INSTALL_TIME
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
+  ${HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
   PARENT_SCOPE
 )
