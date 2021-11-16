@@ -29,8 +29,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "hdf5.h"
-
 /* HDF5 header for dynamic plugin loading */
 #include "H5PLextern.h"
 
