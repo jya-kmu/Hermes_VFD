@@ -38,6 +38,17 @@
 /* Necessary hermes headers */
 #include "hermes_wrapper.h"
 
+#define H5FD_HERMES (H5FD_hermes_init())
+
+/* HDF5 doesn't currently have a driver init callback. Use
+ * macro to initialize driver if loaded as a plugin.
+ */
+#define H5FD_HERMES_INIT          \
+do {                           \
+    if (H5FD_HERMES_g < 0)        \
+        H5FD_HERMES_g = H5FD_HERMES; \
+} while(0)
+
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_HERMES_g = H5I_INVALID_HID;
 
@@ -206,28 +217,6 @@ static void set_blob(bitv_t *bits, size_t bit_pos)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    if (H5FD_hermes_init() < 0)
-        H5FD_HERMES_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, 
-                               "unable to initialize hermes VFD");
-
-done:
-    H5FD_HERMES_FUNC_LEAVE_API;
-} /* end H5FD__init_package() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_hermes_init
  *
  * Purpose:     Initialize this driver by registering the driver with the
@@ -243,12 +232,19 @@ H5FD_hermes_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
+    /* Initialize error reporting */
+    if ((H5FDhermes_err_stack_g = H5Ecreate_stack()) < 0)
+        H5FD_HERMES_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't create HDF5 error stack");
+    if ((H5FDhermes_err_class_g = H5Eregister_class(H5FD_HERMES_ERR_CLS_NAME, H5FD_HERMES_ERR_LIB_NAME, H5FD_HERMES_ERR_VER)) < 0)
+        H5FD_HERMES_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't register error class with HDF5 error API");
+
     if (H5I_VFL != H5Iget_type(H5FD_HERMES_g))
         H5FD_HERMES_g = H5FDregister(&H5FD_hermes_g);
 
     /* Set return value */
     ret_value = H5FD_HERMES_g;
 
+done:
     H5FD_HERMES_FUNC_LEAVE;
 } /* end H5FD_hermes_init() */
 
@@ -341,8 +337,9 @@ H5FD__hermes_fapl_free(void *_fa)
 {
     H5FD_hermes_fapl_t *fa = (H5FD_hermes_fapl_t *)_fa;
     herr_t ret_value       = SUCCEED; /* Return value */
-
-    free(fa);
+   
+    if (fa)
+        free(fa);
 
     H5FD_HERMES_FUNC_LEAVE;
 }
@@ -365,8 +362,11 @@ H5FD__hermes_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     int             o_flags;     /* Flags for open() call    */
     struct stat     sb;
     const H5FD_hermes_fapl_t *fa   = NULL;
+    H5FD_hermes_fapl_t        new_fa;
     char           *hermes_config = NULL;
     H5FD_t         *ret_value = NULL; /* Return value */
+
+    H5FD_HERMES_INIT;
 
     /* Sanity check on file offsets */
     assert(sizeof(off_t) >= sizeof(size_t));
@@ -378,8 +378,25 @@ H5FD__hermes_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         H5FD_HERMES_GOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
     if (ADDR_OVERFLOW(maxaddr))
         H5FD_HERMES_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr");
-    assert(H5P_DEFAULT != fapl_id);
-    fa = H5Pget_driver_info(fapl_id);
+
+    /* Get the driver specific information */
+    H5E_BEGIN_TRY
+    {    
+        fa = H5Pget_driver_info(fapl_id);
+    }
+    H5E_END_TRY;
+   if (!fa || (H5P_FILE_ACCESS_DEFAULT == fapl_id)) {
+        ssize_t config_str_len = 0;
+        char config_str_buf[128];
+        if ((config_str_len = H5Pget_driver_config_str(fapl_id, config_str_buf, 128)) < 0)
+            printf("H5Pget_driver_config_str() error\n");
+        char* token = strtok(config_str_buf, " ");
+        if(!strcmp(token, "true") || !strcmp(token, "TRUE") || !strcmp(token, "True"))
+            new_fa.persistence = true;
+        token = strtok(0, " ");
+        sscanf(token, "%zu", &(new_fa.page_size));
+        fa = &new_fa;
+    }
 
     /* Initialize Hermes */
     if ((H5OPEN hermes_initialized) == FAIL) {
@@ -929,3 +946,17 @@ done:
 
     H5FD_HERMES_FUNC_LEAVE;
 } /* end H5FD__hermes_write() */
+
+/*
+ * Stub routines for dynamic plugin loading
+ */
+
+H5PL_type_t
+H5PLget_plugin_type(void) {
+    return H5PL_TYPE_VFD;
+}
+
+const void*
+H5PLget_plugin_info(void) {
+    return &H5FD_hermes_g;
+}

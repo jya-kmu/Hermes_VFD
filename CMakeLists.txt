@@ -144,10 +144,90 @@ function(hdf5_hermes_vfd_set_lib_options libtarget libname libtype)
   endif()
 endfunction()
 
+#------------------------------------------------------------------------------
+# External dependencies
+#------------------------------------------------------------------------------
+#HDF5
+find_package(HDF5 1.13.0 NO_MODULE NAMES hdf5 COMPONENTS C shared)
+if(HDF5_FOUND)
+  set(HDF5_C_SHARED_LIBRARY hdf5-shared)
+#  if(NOT TARGET ${HDF5_C_SHARED_LIBRARY})
+#      message(FATAL_ERROR "Could not find hdf5 shared target, please make "
+#"sure that HDF5 has ben compiled with shared libraries enabled.")
+#    endif()
+  set(HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
+      ${HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
+      ${HDF5_INCLUDE_DIR}
+     )
+  set(HDF5_HERMES_VFD_EXT_PKG_DEPENDENCIES
+      ${HDF5_HERMES_VFD_EXT_PKG_DEPENDENCIES}
+      ${HDF5_C_SHARED_LIBRARY}
+     )
+else()
+# Allow for HDF5 autotools builds
+  find_package(HDF5 1.13.0 MODULE REQUIRED)
+  if(HDF5_FOUND)
+    set(HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
+        ${HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
+        ${HDF5_INCLUDE_DIRS}
+       )
+    set(HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES
+        ${HDF5_HERMES_VFD`_EXT_LIB_DEPENDENCIES}
+        ${HDF5_LIBRARIES}
+       )
+  else()
+    message(FATAL_ERROR "Could not find HDF5, please check HDF5_DIR.")
+  endif()
+endif()
+
+#Hermes
+find_package(HERMES REQUIRED CONFIG)
+if(HERMES_FOUND)
+  set(HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
+    ${HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
+    ${HERMES_INCLUDE_DIR}
+  )
+  set(HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES
+    ${HERMES_VFD_EXT_LIB_DEPENDENCIES}
+    hermes_wrapper
+  )
+else()
+  message(FATAL_ERROR "Could not find hermes.")
+endif()
+
+#MPI
+option(HERMES_VFD_ENABLE_MPI "Enable MPI." ON)
+if(HERMES_VFD_ENABLE_MPI)
+  find_package(MPI REQUIRED)
+  if(MPI_FOUND)
+    message(STATUS "found mpi.h at ${MPI_INCLUDE_PATH}")
+    set(HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES
+      ${HDF5_HERMES_VFD_EXT_INCLUDE_DEPENDENCIES}
+      ${MPI_INCLUDE_PATH}
+    )
+    set(HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES
+      ${HDF5_HERMES_VFD_EXT_LIB_DEPENDENCIES}
+      ${MPI_LIBRARIES}
+    )
+  else()
+    message(FATAL_ERROR "Could not find MPI.")
+  endif()
+endif()
+
 #-----------------------------------------------------------------------------
 # Source
 #-----------------------------------------------------------------------------
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+#-----------------------------------------------------------------------------
+# Testing
+#-----------------------------------------------------------------------------
+option(BUILD_TESTING "Build testing." ON)
+if(NOT HDF5_HERMES_VFD_EXTERNALLY_CONFIGURED AND BUILD_TESTING)
+  enable_testing()
+  include(CTest)
+  add_subdirectory(test)
+endif()
 
 #-----------------------------------------------------------------------------
 # Configure the config.cmake file for the build directory

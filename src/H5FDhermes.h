@@ -20,8 +20,6 @@
 #ifndef H5FDhermes_H
 #define H5FDhermes_H
 
-#define H5FD_HERMES (H5FD_hermes_init())
-
 #define H5FD_HERMES_NAME  "hermes"
 #define H5FD_HERMES_VALUE ((H5FD_class_value_t)(513))
 
