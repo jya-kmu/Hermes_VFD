@@ -347,28 +347,6 @@ H5FD__hermes_fapl_free(void *_fa)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__hermes_populate_config
- *
- * Purpose:    Populates a H5FD_hermes_fapl_t structure with the provided
- *             values, supplying defaults where values are not provided.
- *
- * Return:    Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__hermes_populate_config(bool persistance, size_t page_size, H5FD_hermes_fapl_t *fa_out)
-{
-    herr_t ret_value = SUCCEED;
-
-    assert(fa_out);
-
-    memset(fa_out, 0, sizeof(H5FD_hermes_fapl_t));
-
-    H5FD_HERMES_FUNC_LEAVE;
-}
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD__hermes_open
  *
  * Purpose:     Create and/or opens a bucket in Hermes.
