@@ -12,6 +12,7 @@ include_directories(
 set(hermes_vfd_tests
   hermes_set_fapl
   hermes_driver
+  hermes_env
 )
 
 foreach(vfd_test ${hermes_vfd_tests})
@@ -35,25 +36,19 @@ endforeach()
 #-----------------------------------------------------------------------------
 # Tests
 #-----------------------------------------------------------------------------
-#add_test(NAME "Testhermes_set_fapl" COMMAND hermes_set_fapl)
-#set_tests_properties(Testhermes_set_fapl PROPERTIES
-#  ENVIRONMENT "HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf"
-#)
+add_test(NAME "Testhermes_set_fapl" COMMAND hermes_set_fapl)
+set_tests_properties(Testhermes_set_fapl PROPERTIES
+  ENVIRONMENT "HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf"
+)
 
-#add_test(NAME "Testhermes_driver" 
-#         COMMAND hermes_driver -E env HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf HDF5_PLUGIN_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-#set_tests_properties(Testhermes_driver PROPERTIES
-#  ENVIRONMENT "HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf;HDF5_PLUGIN_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-#)
-foreach(vfd_test ${hermes_vfd_tests})
-  add_test(NAME "${vfd_test}"
-    COMMAND $<TARGET_FILE:${vfd_test}>
-  )
-  set_tests_properties(${vfd_test} PROPERTIES
-    ENVIRONMENT "HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf"
-  )
-endforeach()
+add_test(NAME "Testhermes_driver" 
+         COMMAND hermes_driver -E env HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf HDF5_PLUGIN_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_tests_properties(Testhermes_driver PROPERTIES
+  ENVIRONMENT "HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf;HDF5_PLUGIN_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+)
 
-set_tests_properties(hermes_driver PROPERTIES
-  ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+add_test(NAME "Testhermes_env" 
+         COMMAND hermes_env -E env HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf)
+set_tests_properties(Testhermes_env PROPERTIES
+  ENVIRONMENT "HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf;HDF5_DRIVER=hermes;HDF5_PLUGIN_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY};HDF5_DRIVER_CONFIG="true 1024""
 )

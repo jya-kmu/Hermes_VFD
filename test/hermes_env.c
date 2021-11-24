@@ -8,6 +8,9 @@
 #include "hdf5.h"
 #include "H5FDhermes.h"
 
+/* HDF5 header for dynamic plugin loading */
+#include "H5PLextern.h"
+
 #define DATASETNAME "IntArray"
 #define NX     128                      /* dataset dimensions */
 #define NY     128
@@ -22,8 +25,6 @@ int main(int argc, char *argv[]) {
     int         data_out[NX][NY];         /* data to read */
     int         i, j, k;
 
-    const char *const config_str = "true 1024";
-
     int mpi_threads_provided;
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &mpi_threads_provided);
     if (mpi_threads_provided < MPI_THREAD_MULTIPLE) {
@@ -35,11 +36,6 @@ int main(int argc, char *argv[]) {
         printf("H5Pcreate() error\n");
     else
         printf("H5Pcreate() succeeded\n");
-
-    if (H5Pset_driver_by_name(fapl_id, "hermes", config_str) < 0)
-        printf("H5Pset_driver_by_name() error\n");
-    else
-        printf("H5Pset_driver_by_name() succeeded\n");
 
     if ((file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         printf("H5Fcreate() error\n");

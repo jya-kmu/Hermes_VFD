@@ -262,7 +262,10 @@ H5FD__hermes_term(void)
 {
     herr_t ret_value= SUCCEED;
    
-    HermesFinalize();
+    if ((H5OPEN hermes_initialized) == TRUE) {
+        HermesFinalize();
+        hermes_initialized = FALSE;
+    }
 
     /* Unregister from HDF5 error API */
     if (H5FDhermes_err_class_g >= 0) {
@@ -337,9 +340,30 @@ H5FD__hermes_fapl_free(void *_fa)
 {
     H5FD_hermes_fapl_t *fa = (H5FD_hermes_fapl_t *)_fa;
     herr_t ret_value       = SUCCEED; /* Return value */
-   
-    if (fa)
-        free(fa);
+
+    free(fa);
+
+    H5FD_HERMES_FUNC_LEAVE;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__hermes_populate_config
+ *
+ * Purpose:    Populates a H5FD_hermes_fapl_t structure with the provided
+ *             values, supplying defaults where values are not provided.
+ *
+ * Return:    Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__hermes_populate_config(bool persistance, size_t page_size, H5FD_hermes_fapl_t *fa_out)
+{
+    herr_t ret_value = SUCCEED;
+
+    assert(fa_out);
+
+    memset(fa_out, 0, sizeof(H5FD_hermes_fapl_t));
 
     H5FD_HERMES_FUNC_LEAVE;
 }
@@ -362,14 +386,14 @@ H5FD__hermes_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     int             o_flags;     /* Flags for open() call    */
     struct stat     sb;
     const H5FD_hermes_fapl_t *fa   = NULL;
-    H5FD_hermes_fapl_t        new_fa;
+    H5FD_hermes_fapl_t new_fa;
     char           *hermes_config = NULL;
     H5FD_t         *ret_value = NULL; /* Return value */
 
-    H5FD_HERMES_INIT;
-
     /* Sanity check on file offsets */
     assert(sizeof(off_t) >= sizeof(size_t));
+
+    H5FD_HERMES_INIT;
 
     /* Check arguments */
     if (!name || !*name)
@@ -385,7 +409,7 @@ H5FD__hermes_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
         fa = H5Pget_driver_info(fapl_id);
     }
     H5E_END_TRY;
-   if (!fa || (H5P_FILE_ACCESS_DEFAULT == fapl_id)) {
+    if (!fa || (H5P_FILE_ACCESS_DEFAULT == fapl_id)) {
         ssize_t config_str_len = 0;
         char config_str_buf[128];
         if ((config_str_len = H5Pget_driver_config_str(fapl_id, config_str_buf, 128)) < 0)
