@@ -43,12 +43,6 @@ set_tests_properties(Testhermes_set_fapl PROPERTIES
 
 add_test(NAME "Testhermes_driver" 
          COMMAND hermes_driver -E env HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf HDF5_PLUGIN_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-set_tests_properties(Testhermes_driver PROPERTIES
-  ENVIRONMENT "HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf;HDF5_PLUGIN_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-)
 
-add_test(NAME "Testhermes_env" 
-         COMMAND hermes_env -E env HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf)
-set_tests_properties(Testhermes_env PROPERTIES
-  ENVIRONMENT "HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf;HDF5_DRIVER=hermes;HDF5_PLUGIN_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY};HDF5_DRIVER_CONFIG="true 1024""
-)
+add_test(NAME "Testhermes_env"
+         COMMAND hermes_driver -E env HERMES_CONF=${CMAKE_CURRENT_SOURCE_DIR}/hermes.conf HDF5_PLUGIN_PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY} HDF5_DRIVER_CONFIG="true 1024" HDF5_DRIVER=hermes)
