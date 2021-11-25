@@ -43,3 +43,7 @@ To explicitly load the Hermes VFD inside an HDF5 application, a call to the `H5P
 
 ### Method 3: Dynamically loaded by environment variable
 To implicitly load the Hermes VFD inside an HDF5 application, the HDF5_DRIVER environment variable may be set to the string "hermes". During library initialization, HDF5 will check this environment variable, load the Hermes VFD as a plugin and set the VFD as the default file driver on File Access Property Lists. Therefore, any file access that uses H5P_DEFAULT for its FAPL, or which uses a FAPL that hasn't had a specific VFD set on it, will automatically use the Hermes VFD for file access. User can simply setup HDF5_DRIVER environment variable to "hermes" and HDF5_DRIVER_CONFIG the same as `driver_config` parameter without calling `H5Pset_driver_by_name()`, compared to Method 2 Dynamically loaded by FAPL. Test `hermes_env` is using this method.
+
+## More Information
+[More about Hermes](https://github.com/HDFGroup/hermes/wiki)
+[HDF5 VFD Plugins RFC](https://github.com/HDFGroup/hdf5doc/blob/master/RFCs/HDF5_Library/VFL_DriverPlugins/RFC__A_Plugin_Interface_for_HDF5_Virtual_File_Drivers.pdf)
