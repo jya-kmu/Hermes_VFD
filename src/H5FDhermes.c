@@ -43,9 +43,9 @@
 /* HDF5 doesn't currently have a driver init callback. Use
  * macro to initialize driver if loaded as a plugin.
  */
-#define H5FD_HERMES_INIT          \
-do {                           \
-    if (H5FD_HERMES_g < 0)        \
+#define H5FD_HERMES_INIT             \
+do {                                 \
+    if (H5FD_HERMES_g < 0)           \
         H5FD_HERMES_g = H5FD_HERMES; \
 } while(0)
 
@@ -261,7 +261,7 @@ static herr_t
 H5FD__hermes_term(void)
 {
     herr_t ret_value= SUCCEED;
-   
+ 
     if ((H5OPEN hermes_initialized) == TRUE) {
         HermesFinalize();
         hermes_initialized = FALSE;
@@ -656,8 +656,7 @@ H5FD__hermes_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     haddr_t ret_value = HADDR_UNDEF;
 
     const H5FD_hermes_t *file = (const H5FD_hermes_t *)_file;
-
-    
+ 
     ret_value = file->eof;
 
     H5FD_HERMES_FUNC_LEAVE;
@@ -952,7 +951,6 @@ done:
 /*
  * Stub routines for dynamic plugin loading
  */
-
 H5PL_type_t
 H5PLget_plugin_type(void) {
     return H5PL_TYPE_VFD;
